@@ -30,6 +30,7 @@ class ViewController: UIViewController {
         let viewController = EmojiPickerViewController()
         viewController.delegate = self
         viewController.sourceView = sender
+        viewController.isDismissedAfterChoosing = false
         present(viewController, animated: true)
     }
     
