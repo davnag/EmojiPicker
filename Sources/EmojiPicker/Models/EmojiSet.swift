@@ -23,7 +23,7 @@
 /// An object that represents set of emojis.
 struct EmojiSet: Decodable {
     /// Emoji categories.
-    let categories: [Category]
+    var categories: [Category]
     /// Emojis dictionary from which you can get emojis by ID.
     let emojis: [Emoji.ID: Emoji]
     /// Aliases of keywords for emojis.

@@ -9,8 +9,23 @@
 
 class EmojiManagerStub: EmojiManagerProtocol {
     
+    private var recentEmojiIDs: [Emoji.ID] = []
+    
     func provideEmojis() -> EmojiSet {
         emojiSet
+    }
+
+    func addRecentEmoji(_ emoji: Emoji) {
+        
+        var emojis = self.recentEmojiIDs
+        
+        if let index = emojis.firstIndex(of: emoji.id) {
+            emojis.remove(at: index)
+        }
+        
+        emojis.insert(emoji.id, at: 0)
+        
+        self.recentEmojiIDs = Array(emojis.prefix(16))
     }
     
     var emojiSet = EmojiSet(

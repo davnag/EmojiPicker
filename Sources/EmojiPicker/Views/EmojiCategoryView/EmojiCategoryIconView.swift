@@ -98,6 +98,8 @@ extension EmojiCategoryIconView {
         )
         
         switch type {
+        case .recent:
+            CategoryIconsDrawKit.drawRecentCategory(frame: rect, tintColor: currentIconTintColor)
         case .people:
             CategoryIconsDrawKit.drawPeopleCategory(frame: rect, tintColor: currentIconTintColor)
         case .nature:
@@ -168,6 +170,43 @@ extension EmojiCategoryIconView {
                 result.origin.y = target.minY + (target.height - result.height) / 2
                 return result
             }
+        }
+        
+        // MARK: - Recent Category
+        
+        class func drawRecentCategory(frame targetFrame: CGRect = CGRect(x: 0, y: 0, width: 400, height: 400), resizing: ResizingBehavior = .aspectFit, tintColor: UIColor) {
+            guard let context = UIGraphicsGetCurrentContext() else { return }
+            
+            context.saveGState()
+            let resizedFrame: CGRect = resizing.apply(rect: CGRect(x: 0, y: 0, width: 400, height: 400), target: targetFrame)
+            context.translateBy(x: resizedFrame.minX, y: resizedFrame.minY)
+            context.scaleBy(x: resizedFrame.width / 400, y: resizedFrame.height / 400)
+            
+            let ovalPath = UIBezierPath(ovalIn: CGRect(x: 14, y: 14, width: 372, height: 372))
+            tintColor.setStroke()
+            ovalPath.lineWidth = 20
+            ovalPath.stroke()
+
+            let bezierPath = UIBezierPath()
+            bezierPath.move(to: CGPoint(x: 190, y: 51))
+            bezierPath.addLine(to: CGPoint(x: 190, y: 51))
+            bezierPath.addLine(to: CGPoint(x: 210, y: 51))
+            bezierPath.addLine(to: CGPoint(x: 210, y: 230))
+            bezierPath.addLine(to: CGPoint(x: 190, y: 230))
+            
+            bezierPath.move(to: CGPoint(x: 190, y: 230))
+            bezierPath.addLine(to: CGPoint(x: 190, y: 230))
+            bezierPath.addLine(to: CGPoint(x: 190, y: 210))
+            bezierPath.addLine(to: CGPoint(x: 50, y: 210))
+            bezierPath.addLine(to: CGPoint(x: 50, y: 230))
+            
+            bezierPath.close()
+            bezierPath.close()
+            bezierPath.usesEvenOddFillRule = true
+            tintColor.setFill()
+            bezierPath.fill()
+            
+            context.restoreGState()
         }
         
         // MARK: - People Category

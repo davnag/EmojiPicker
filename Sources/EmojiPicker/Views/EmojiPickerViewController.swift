@@ -106,6 +106,8 @@ public final class EmojiPickerViewController: UIViewController {
     
     // MARK: - Private Properties
     
+    /// Emoji manager
+    private let emojiManager = EmojiManager()
     /// View of this controller.
     private let emojiPickerView = EmojiPickerView()
     /// An obect that creates haptics to simulate physical impacts.
@@ -117,7 +119,7 @@ public final class EmojiPickerViewController: UIViewController {
     
     /// Creates EmojiPicker view controller with provided configuration.
     public init() {
-        let emojiManager = EmojiManager()
+        
         viewModel = EmojiPickerViewModel(emojiManager: emojiManager)
         
         super.init(nibName: nil, bundle: nil)
@@ -145,11 +147,25 @@ public final class EmojiPickerViewController: UIViewController {
         setupHorizontalInset()
     }
     
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        guard isBeingDismissed else { return }
+        
+        let selectedEmojiID = viewModel.selectedEmoji.value
+        
+        guard let emoji = emojiManager.provideEmojis().emojis.first(where: { $0.value.emoji == selectedEmojiID }) else { return }
+
+        emojiManager.addRecentEmoji(emoji.value)
+    }
+    
     // MARK: - Private Methods
     
     private func bindViewModel() {
         viewModel.selectedEmoji.bind { [unowned self] emoji in
+            
             feedbackGenerator?.impactOccurred()
+            
             delegate?.didGetEmoji(emoji: emoji)
             
             if isDismissedAfterChoosing {
@@ -308,4 +324,34 @@ extension EmojiPickerViewController: UIAdaptivePresentationControllerDelegate {
     public func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
         return .none
     }
+}
+// MARK: - Previews
+import SwiftUI
+
+struct OverviewRootViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        ViewControllerRepresentable(
+            controller: EmojiPickerViewController()
+        )
+    }
+}
+
+struct ViewControllerRepresentable: UIViewControllerRepresentable {
+    
+    private var makeController: (() -> UIViewController)?
+    
+    init(controller: @autoclosure @escaping () -> UIViewController) {
+        self.makeController = controller
+    }
+    
+    func makeUIViewController(context: Context) -> UIViewController {
+        
+        guard let controller = self.makeController?() else {
+            return UIViewController()
+        }
+        
+        return controller
+    }
+    
+    func updateUIViewController(_ uiView: UIViewController, context: Context) {}
 }

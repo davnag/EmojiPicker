@@ -35,6 +35,7 @@ struct Category: Decodable {
 
 /// Type-safe representation of emoji categories.
 enum CategoryType: String, Decodable, CaseIterable {
+    case recent
     case people
     case nature
     case foods

@@ -28,6 +28,11 @@ protocol EmojiManagerProtocol {
     ///
     /// - Returns: Set of emojis.
     func provideEmojis() -> EmojiSet
+    
+    /// Add a recently used emoji identifier
+    ///
+    ///
+    func addRecentEmoji(_ emoji: Emoji)
 }
 
 /// The class is responsible for getting a relevant set of emojis for iOS version.
@@ -35,6 +40,21 @@ final class EmojiManager: EmojiManagerProtocol {
     
     // MARK: - Private Properties
     
+    private let recemtEmojiIDsUserDefultsKey: String = "EmojiManager.RecentEmojis.IDs"
+    
+    /// Provides a array of recent emojis identifiers.
+    ///
+    /// - Returns: Array of emojis identifiers.
+    private var recentEmojiIDs: [Emoji.ID] {
+        get {
+            
+            return UserDefaults.standard.stringArray(forKey: recemtEmojiIDsUserDefultsKey) ?? []
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: recemtEmojiIDsUserDefultsKey)
+        }
+    }
+
     /// An object that decodes instances of a data type from JSON objects.
     private let decoder = JSONDecoder()
     
@@ -74,17 +94,37 @@ final class EmojiManager: EmojiManagerProtocol {
     // MARK: - Internal Methods
     
     func provideEmojis() -> EmojiSet {
-        guard let path = Bundle.module.path(forResource: emojiVersion, ofType: "json"),
-              let data = try? Data(contentsOf: URL(fileURLWithPath: path))
+        
+        guard
+            let path = Bundle.module.path(forResource: emojiVersion, ofType: "json"),
+            let data = try? Data(contentsOf: URL(fileURLWithPath: path))
         else {
             fatalError("Could not get data from \"\(emojiVersion).json\" file")
         }
         
-        guard let emojiSet = try? decoder.decode(EmojiSet.self, from: data)
+        guard
+            var emojiSet = try? decoder.decode(EmojiSet.self, from: data)
         else {
             fatalError("Could not get emoji set from data: \(data)")
         }
         
+        let recent = Category(type: .recent, identifiers: (recentEmojiIDs))
+        
+        emojiSet.categories.insert(recent, at: 0)
+        
         return emojiSet
+    }
+
+    func addRecentEmoji(_ emoji: Emoji) {
+        
+        var emojis = self.recentEmojiIDs
+        
+        if let index = emojis.firstIndex(of: emoji.id) {
+            emojis.remove(at: index)
+        }
+        
+        emojis.insert(emoji.id, at: 0)
+        
+        self.recentEmojiIDs = Array(emojis.prefix(16))
     }
 }
