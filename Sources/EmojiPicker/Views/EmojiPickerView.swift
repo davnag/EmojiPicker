@@ -189,3 +189,31 @@ extension EmojiPickerView: EmojiCategoryViewDelegate {
         delegate?.didChoiceEmojiCategory(at: index)
     }
 }
+
+// MARK: - Previews
+
+import SwiftUI
+
+fileprivate struct ViewRepresentable: UIViewRepresentable {
+    
+    let view: UIView
+    
+    func makeUIView(context: Context) -> UIView {
+        view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
+
+struct EmojiPickerView_Previews: PreviewProvider {
+    
+    static var previews: some View {
+        
+        ViewRepresentable(
+            view: EmojiPickerView(
+                frame: CGRect(x: 0, y: 0, width: 320, height: 300)
+            )
+        )
+        .frame(width: 320, height: 300)
+    }
+}
